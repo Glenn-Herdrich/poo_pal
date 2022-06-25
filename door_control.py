@@ -2,8 +2,6 @@ import RPi.GPIO as GPIO
 from time import sleep
 import pinout
 
-
-
 STEP = pinout.STEP
 DIR = pinout.DIR
 EN = pinout.EN
@@ -17,7 +15,6 @@ GPIO.setup(DIR, GPIO.OUT)
 GPIO.setup(TOP_LIMIT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(BOT_LIMIT, GPIO.IN, pull_up_down=GPIO.PUD_UP)   
 GPIO.setup(POWER, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
 
 def motor_status():
     
