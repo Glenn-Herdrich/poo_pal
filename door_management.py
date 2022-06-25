@@ -47,7 +47,6 @@ def schedule_control(begin_time, end_time, check_time=None):
     else: # crosses midnight
         return check_time >= begin_time or check_time <= end_time
 
-
 setup()
 
 while True:
