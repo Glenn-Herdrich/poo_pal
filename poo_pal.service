@@ -1,0 +1,13 @@
+[Unit]
+Description=Poo Pal
+After=multi-user.target
+
+[Service]
+Type=idle
+User=unknown
+ExecStart=/usr/bin/python3 /home/unknown/Documents/poo_pal/poo_pal.py
+Restart=on-abort
+ExecStopPost=/usr/bin/python /home/unknown/Documents/poo_pal/service/cleanup.py
+
+[Install]
+WantedBy=multi-user.target
