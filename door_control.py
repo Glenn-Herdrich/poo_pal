@@ -16,6 +16,16 @@ GPIO.setup(TOP_LIMIT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(BOT_LIMIT, GPIO.IN, pull_up_down=GPIO.PUD_UP)   
 GPIO.setup(POWER, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
+def door_status():
+    top_button = GPIO.input(TOP_LIMIT)
+    bot_button = GPIO.input(BOT_LIMIT)    
+    if top_button == 0 or bot_button == 0:
+        #Door is Open or Close
+        return True
+    if bot_button == 1 and top_button == 1:
+        #Door is in motion or broken :(
+        return False
+
 def motor_status():
     
     motor_en = GPIO.input(EN)
