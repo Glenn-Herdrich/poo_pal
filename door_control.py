@@ -82,6 +82,8 @@ def action_door(action):
         if power_buttom == 0:
             GPIO.output(EN,0)
             break
+        #if path_status() < 70:
+            #GPIO.output(DIR,1)
         GPIO.output(STEP,GPIO.HIGH)
         sleep(.001) 
         GPIO.output(STEP,GPIO.LOW)
