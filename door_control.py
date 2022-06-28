@@ -37,10 +37,10 @@ def path_status():
     StartTime = time.time()
     StopTime = time.time()
  
-    while GPIO.input(GPIO_ECHO) == 0:
+    while GPIO.input(ECHO) == 0:
         StartTime = time.time()
         
-    while GPIO.input(GPIO_ECHO) == 1:
+    while GPIO.input(ECHO) == 1:
         StopTime = time.time()
  
     TimeElapsed = StopTime - StartTime
