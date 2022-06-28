@@ -6,8 +6,8 @@ STEP = pinout.STEP
 DIR = pinout.DIR
 EN = pinout.EN
 POWER = pinout.POWER
-TRIGGER = pinout.GPIO_TRIGGER
-ECHO = pinout.GPIO_ECHO
+TRIGGER = pinout.TRIGGER
+ECHO = pinout.ECHO
 TOP_LIMIT = pinout.TOP_LIMIT
 BOT_LIMIT = pinout.BOT_LIMIT
 GPIO.setmode(GPIO.BOARD)
