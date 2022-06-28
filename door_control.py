@@ -6,12 +6,16 @@ STEP = pinout.STEP
 DIR = pinout.DIR
 EN = pinout.EN
 POWER = pinout.POWER
+GPIO_TRIGGER = pinout.GPIO_TRIGGER
+GPIO_ECHO = pinout.GPIO_ECHO
 TOP_LIMIT = pinout.TOP_LIMIT
 BOT_LIMIT = pinout.BOT_LIMIT
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(EN, GPIO.OUT)
 GPIO.setup(STEP, GPIO.OUT)
 GPIO.setup(DIR, GPIO.OUT)
+GPIO.setup(GPIO_TRIGGER, GPIO.OUT)
+GPIO.setup(GPIO_ECHO, GPIO.IN)
 GPIO.setup(TOP_LIMIT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(BOT_LIMIT, GPIO.IN, pull_up_down=GPIO.PUD_UP)   
 GPIO.setup(POWER, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -26,6 +30,23 @@ def door_status():
         #Door is in motion or broken :(
         return False
 
+def path_status():
+    GPIO.output(GPIO_TRIGGER, True)
+    time.sleep(0.00001)
+    GPIO.output(GPIO_TRIGGER, False)
+    StartTime = time.time()
+    StopTime = time.time()
+ 
+    while GPIO.input(GPIO_ECHO) == 0:
+        StartTime = time.time()
+        
+    while GPIO.input(GPIO_ECHO) == 1:
+        StopTime = time.time()
+ 
+    TimeElapsed = StopTime - StartTime
+    distance = (TimeElapsed * 34300) / 2
+    return distance    
+    
 def motor_status():
     
     motor_en = GPIO.input(EN)
