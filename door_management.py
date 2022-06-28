@@ -55,5 +55,3 @@ while True:
     #if schedule_control(begin_time,end_time):
     #    action_door(0)
     #ai_control()
-    #check if TF is running TFLite_detection_stream.py --modeldir=Sample_TFLite_model
-    #sleep(0.1)
