@@ -24,8 +24,13 @@ def path_status():
 
     return True if ((pulse_end - pulse_start)  * 17150) < min_distance else False
 
-while True:
-    if path_status():
-        config.set('DOOR', 'path_status', '1')
-    elif not path_status():
-        config.set('DOOR', 'path_status', '0')
+
+def main():
+    while True:
+        if path_status():
+            config.set('DOOR', 'path_status', '1')
+        elif not path_status():
+            config.set('DOOR', 'path_status', '0')
+
+if __name__ == '__main__':
+    main()
