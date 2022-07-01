@@ -1,44 +1,72 @@
 import RPi.GPIO as GPIO
-from time import sleep
-import pinout
+import time
 import os
 import subprocess
-from door_control import action_door, motor_status
 import datetime
+from configparser import ConfigParser
+import logging
 
+config = ConfigParser()
+config.read('status.ini')
+
+OPEN = (config.getint('GPIO', 'OPEN'))
+CLOSE = (config.getint('GPIO', 'CLOSE'))
+POWER = (config.getint('GPIO', 'POWER'))
+STEP = (config.getint('GPIO', 'STEP'))
+DIR = (config.getint('GPIO', 'DIR'))
+EN = (config.getint('GPIO', 'EN'))
+TOP_LIMIT = (config.getint('GPIO', 'TOP_LIMIT'))
+BOT_LIMIT = (config.getint('GPIO', 'BOT_LIMIT'))
+TRIGGER = (config.getint('GPIO', 'TRIGGER'))
+ECHO = (config.getint('GPIO', 'ECHO'))
+POWER_LIGHT = (config.getint('GPIO', 'POWER_LIGHT'))
+
+
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(STEP, GPIO.OUT)
+GPIO.setup(DIR, GPIO.OUT)
+GPIO.setup(EN, GPIO.OUT)
+GPIO.setup(POWER_LIGHT, GPIO.OUT)
+GPIO.setup(POWER, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(OPEN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(CLOSE, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(TOP_LIMIT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(BOT_LIMIT, GPIO.IN, pull_up_down=GPIO.PUD_UP)   
 #Door closure time range
 begin_time = datetime.time(23,00)
 end_time = datetime.time(3,00)
 
-OPEN = pinout.OPEN
-CLOSE = pinout.CLOSE
-POWER = pinout.POWER
 
-def setup():
-    GPIO.setmode(GPIO.BOARD)
-    GPIO.setup(OPEN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    GPIO.setup(CLOSE, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    GPIO.setup(POWER, GPIO.IN, pull_up_down=GPIO.PUD_UP) 
+GPIO.output(POWER_LIGHT,1)
 
 def manual_control():
     
-    open_button = GPIO.input(OPEN)
-    close_button = GPIO.input(CLOSE)
-    power_buttom = GPIO.input(POWER)
-    
-    if open_button == 0:
-        print("Open")
-        action = 1
-        action_door(action)               
+    if not GPIO.input(OPEN):
+        logging.info("Open button triggered")
+        action_door(1)               
         
-    if close_button == 0:
-        print("Close")
-        action = 0
-        action_door(action)
+    if not GPIO.input(CLOSE):
+        logging.info("Close button triggered")
+        action_door(0)
 
-    if power_buttom == 0:
-        print("Power")
-        motor_status()
+    if not GPIO.input(POWER):
+        logging.info("Power button triggered")
+        if GPIO.input(EN):
+            GPIO.output(EN,0)
+            GPIO.output(POWER_LIGHT,0)
+        else: 
+            GPIO.output(EN,1) 
+            GPIO.output(POWER_LIGHT,1) 
+
+def door_status():
+    top_button = GPIO.input(TOP_LIMIT)
+    bot_button = GPIO.input(BOT_LIMIT)    
+    if not top_button  or not bot_button:
+        #Door is Open or Close
+        return True
+    elif bot_button and top_button:
+        #Door is in motion or broken :(
+        return False
 
 def schedule_control(begin_time, end_time, check_time=None):
     check_time = datetime.time()
@@ -47,11 +75,26 @@ def schedule_control(begin_time, end_time, check_time=None):
     else: # crosses midnight
         return check_time >= begin_time or check_time <= end_time
 
-setup()
+def action_door(direction):
+    GPIO.output(EN,1)
+    GPIO.output(DIR,direction)
+    logging.info("Opening Door" if direction else "Closing Door")
+        
+    while True:
+        if (direction and not GPIO.input(TOP_LIMIT)) or (not direction and not GPIO.input(BOT_LIMIT)) or (not GPIO.input(POWER)) or (config.getboolean('DOOR', 'path_status')) or (config.getboolean('DOOR', 'ai_status')): break          
+        #Additional option for Power and path status failures might be needed -- door open  
+        else:
+            GPIO.output(STEP,GPIO.HIGH)
+            time.sleep(.001) 
+            GPIO.output(STEP,GPIO.LOW)
+            time.sleep(.001) 
 
-while True:
-    #GPIO.output(EN,1)
-    manual_control()
-    #if schedule_control(begin_time,end_time):
-    #    action_door(0)
-    #ai_control()
+def main():
+    level = logging.INFO
+    fmt = '[%(levelname)s] %(asctime)s - %(message)s'
+    logging.basicConfig(level=level, format=fmt)
+    while True:
+        manual_control()
+
+if __name__ == '__main__':
+    main()
