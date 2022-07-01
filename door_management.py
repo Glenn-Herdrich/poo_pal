@@ -23,8 +23,6 @@ TRIGGER = (config.getint('GPIO', 'TRIGGER'))
 ECHO = (config.getint('GPIO', 'ECHO'))
 min_distance = (config.getint('DOOR', 'min_distance'))
 
-
-
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(OPEN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(CLOSE, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -115,7 +113,7 @@ def action_door(direction):
     while True:
         config.read(config_file)
         print (config.getboolean('DOOR', 'path_status'))
-        if (direction and not GPIO.input(TOP_LIMIT)) or (not direction and not GPIO.input(BOT_LIMIT)) or (not GPIO.input(POWER)) or (config.getboolean('DOOR', 'path_status')) or (config.getboolean('DOOR', 'ai_status')): break          
+        if (direction and not GPIO.input(TOP_LIMIT)) or (not direction and not GPIO.input(BOT_LIMIT)) or (not GPIO.input(POWER)) or config.getboolean('DOOR', 'path_status') or config.getboolean('DOOR', 'ai_status'): break          
         #Additional option for Power and path status failures might be needed -- door open  
         
         else:
