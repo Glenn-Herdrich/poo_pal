@@ -21,6 +21,8 @@ def door_schedule_actions():
         end_time = scheduled_times[1].get("end_time")
         if check_time(begin_time , end_time) and door_status():
             action_door(0) 
+        if not check_time(begin_time , end_time) and not door_status():
+            action_door(1) 
 
 def main():
     level = logging.INFO
