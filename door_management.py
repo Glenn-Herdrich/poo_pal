@@ -37,23 +37,17 @@ GPIO.setup(TRIGGER, GPIO.OUT)
 GPIO.setup(ECHO, GPIO.IN)
 
 #Door closure time range
-begin_time = datetime.time(23,00)
-end_time = datetime.time(3,00)
-
 
 GPIO.output(POWER_LIGHT,1)
 
 def manual_control():
-    
     if not GPIO.input(OPEN):
         logging.info("Open button triggered")
         action_door(1)               
-        
-    if not GPIO.input(CLOSE):
+    elif not GPIO.input(CLOSE):
         logging.info("Close button triggered")
         action_door(0)
-
-    if not GPIO.input(POWER):
+    elif not GPIO.input(POWER):
         logging.info("Power button triggered")
         if GPIO.input(EN):
             GPIO.output(EN,0)
@@ -72,36 +66,29 @@ def path_check():
         pulse_start = time.time()      
     while GPIO.input(ECHO) == 1: # Need error control if stuck in loop
         pulse_end = time.time()
-
     return True if ((pulse_end - pulse_start)  * 17150) < min_distance else False
 
 def path_status():
     while True:
         if path_check():
-            config.set('DOOR', 'path_status', '1')
+            logging.info("Path disruption detected")
+            GPIO.output(DIR,1)
             break
         elif not path_check():
             config.set('DOOR', 'path_status', '0')
     with open(config_file, 'w') as config_write:
         config.write(config_write)
 
-
 def door_status():
     top_button = GPIO.input(TOP_LIMIT)
     bot_button = GPIO.input(BOT_LIMIT)    
     if not top_button  or not bot_button:
+        logging.info("Door open" if not top_button else "Door closed")
         #Door is Open or Close
         return True
     elif bot_button and top_button:
-        #Door is in motion or broken :(
+        logging.info("Door is in motion or broken")
         return False
-
-def schedule_control(begin_time, end_time, check_time=None):
-    check_time = datetime.time()
-    if begin_time < end_time:
-        return check_time >= begin_time and check_time <= end_time
-    else: # crosses midnight
-        return check_time >= begin_time or check_time <= end_time
 
 def action_door(direction):
     GPIO.output(EN,1)
@@ -109,22 +96,25 @@ def action_door(direction):
     logging.info("Opening Door" if direction else "Closing Door")
     p1 = multiprocessing.Process(target=path_status)
     p1.start()
-    
     while True:
         config.read(config_file)
-        if (direction and not GPIO.input(TOP_LIMIT)) or (not direction and not GPIO.input(BOT_LIMIT)) or (not GPIO.input(POWER)) or config.getboolean('DOOR', 'path_status') or config.getboolean('DOOR', 'ai_status'): break          
-        #Additional option for Power and path status failures might be needed -- door open  
-        
+        if (GPIO.input(DIR) and not GPIO.input(TOP_LIMIT)) or (not GPIO.input(DIR) and not GPIO.input(BOT_LIMIT)) or (not GPIO.input(POWER)) or config.getboolean('DOOR', 'path_status') or config.getboolean('DOOR', 'ai_status'):           
+            break         
         else:
             GPIO.output(STEP,GPIO.HIGH)
             time.sleep(.001) 
             GPIO.output(STEP,GPIO.LOW)
             time.sleep(.001) 
+    config.set('DOOR', 'path_status', '0')
+    with open(config_file, 'w') as config_write:
+        config.write(config_write)
 
 def main():
     level = logging.INFO
     fmt = '[%(levelname)s] %(asctime)s - %(message)s'
     logging.basicConfig(level=level, format=fmt)
+    logging.info("Door management started")    
+
     while True:
         manual_control()
 
