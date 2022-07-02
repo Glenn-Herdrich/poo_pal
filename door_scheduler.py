@@ -1,7 +1,6 @@
 from datetime import datetime, time
 from door_management import action_door, door_status
 import logging
-from dateutil import parser
 import schedule
 
 def check_time(begin_time, end_time, check_time=None):  
