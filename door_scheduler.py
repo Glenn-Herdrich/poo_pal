@@ -13,14 +13,18 @@ def check_time(begin_time, end_time, check_time=None):
 
 def door_schedule_actions():
     logging.info("Checking schedules") 
-    scheduled_times = {1 : {"begin_time" : time(4,00), "end_time" : time(10,00)}}
+    scheduled_times = {1 : {"begin_time" : time(5,00), "end_time" : time(15,00)}} #10PM - 5AM
     
     for i in scheduled_times.items():
         begin_time = scheduled_times[1].get("begin_time")
         end_time = scheduled_times[1].get("end_time")
-        if check_time(begin_time , end_time) and door_status():
+        checked_time = check_time(begin_time, end_time)
+
+        if checked_time and door_status():
+            logging.info("Checking schedules - Close Door") 
             action_door(0) 
-        if not check_time(begin_time , end_time) and not door_status():
+        if not checked_time and door_status():
+            logging.info("Checking schedules - Open Door") 
             action_door(1) 
 
 def main():
