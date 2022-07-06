@@ -82,7 +82,7 @@ def path_status():
 def door_status():
     top_button = GPIO.input(TOP_LIMIT)
     bot_button = GPIO.input(BOT_LIMIT)    
-    if not top_button  or not bot_button:
+    if not top_button or not bot_button:
         logging.info("Door open" if not top_button else "Door closed")
         #Door is Open or Close
         return True
