@@ -43,9 +43,11 @@ GPIO.output(POWER_LIGHT,1)
 def manual_control():
     if not GPIO.input(OPEN):
         logging.info("Open button triggered")
+        config.set('DOOR', 'override', '1')
         action_door(1)               
     elif not GPIO.input(CLOSE):
         logging.info("Close button triggered")
+        config.set('DOOR', 'override', '1')
         action_door(0)
     elif not GPIO.input(POWER):
         logging.info("Power button triggered")
@@ -105,7 +107,6 @@ def action_door(direction):
             time.sleep(.001) 
             GPIO.output(STEP,GPIO.LOW)
             time.sleep(.001) 
-    config.set('DOOR', 'path_status', '0')
     with open(config_file, 'w') as config_write:
         config.write(config_write)
 
