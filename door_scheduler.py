@@ -21,15 +21,16 @@ def door_schedule_actions():
     logging.info("Checking schedules") 
     scheduled_times = {1 : {"begin_time" : time(22,00), "end_time" : time(5,00)}} #10PM - 5AM
     override = (config.getint('DOOR', 'override'))
+
     for i in scheduled_times.items():
         begin_time = scheduled_times[1].get("begin_time")
         end_time = scheduled_times[1].get("end_time")
         checked_time = check_time(begin_time, end_time)
 
-        if checked_time and door_status() and not override:
+        if (checked_time and door_status() and not override):
             logging.info("Checking schedules - Close Door") 
             action_door(0) 
-        if not checked_time and door_status() and not override:
+        if (not checked_time and door_status() and not override):
             logging.info("Checking schedules - Open Door") 
             action_door(1) 
 
