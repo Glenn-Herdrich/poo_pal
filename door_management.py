@@ -92,9 +92,18 @@ def door_status():
         logging.info("Door is in motion or broken")
         return False
 
+def door_lock(lock_action):
+    if lock_action:
+        #GPIO.output(LOCK,GPIO.HIGH)
+        logging.info("Door is unlocked")
+    elif not lock_action
+        #GPIO.output(LOCK,GPIO.LOW)
+        logging.info("Door is locked")
+
 def action_door(direction):
     GPIO.output(EN,1)
     GPIO.output(DIR,direction)
+    door_lock(0)
     logging.info("Opening Door" if direction else "Closing Door")
     p1 = multiprocessing.Process(target=path_status)
     p1.start()
@@ -109,11 +118,12 @@ def action_door(direction):
             time.sleep(.001) 
     with open(config_file, 'w') as config_write:
         config.write(config_write)
+    door_lock(1)
 
 def main():
     level = logging.INFO
     fmt = '[%(levelname)s] %(asctime)s - %(message)s'
-    logging.basicConfig(level=level, format=fmt)
+    logging.basicConfig(level=level, format=fmt, filename='/home/unknown/Documents/poo_pal/door_schedule.log')
     logging.info("Door management started")    
 
     while True:
